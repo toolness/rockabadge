@@ -7,6 +7,14 @@
   {{> badgeTypeList}}
 </body>
 
+<template name="nominateForm">
+  <div class="well">
+    <h4>Nominate a Friend for the {{name}} Badge</h4>
+    <input type="text" placeholder="Enter friend name" class="friends-list" data-provide="typeahead" data-source="{{friends}}">
+    <button class="btn btn-primary">Nominate</button>
+  </div>
+</template>
+
 <template name="badgeTypeList">
   <h2>Badge Types</h2>
   <ul class="badgeTypes">
@@ -50,8 +58,19 @@
     {{> badgeTypeImage}}
     {{> badgeTypeName}}
     {{> badgeTypeDesc}}
+    <div class="actions">
     {{#if adminUser}}
     <button class="btn btn-mini btn-danger remove-badgetype">Remove</button>
+    {{/if}}
+    {{#if currentUser}}
+      {{#if nominating}}
+      {{else}}
+      <button class="btn btn-mini nominate">Nominate&hellip;</button>
+      {{/if}}
+    {{/if}}
+    </div>
+    {{#if nominating}}
+    {{> nominateForm}}
     {{/if}}
   </li>
 </template>

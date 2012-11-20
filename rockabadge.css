@@ -9,6 +9,10 @@
   display: block;
 }
 
+.actions {
+  padding-bottom: 10px;
+}
+
 .badge-name.display {
   font-weight: bold;
 }

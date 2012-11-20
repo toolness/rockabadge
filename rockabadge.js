@@ -2,7 +2,10 @@ var BadgeTypes = new Meteor.Collection("badgetypes");
 
 if (Meteor.isClient) (function setupClient() {
   Meteor.subscribe("rockabadge.adminUser");
+  Meteor.subscribe("rockabadge.facebookInfo");
   Meteor.subscribe("rockabadge.badgeTypes");
+  Session.set("nominating", null);
+  Session.set("friends", []);
   
   var isAdminUser = function() {
     var user = Meteor.user();
@@ -51,6 +54,16 @@ if (Meteor.isClient) (function setupClient() {
   };
   
   if (typeof Handlebars !== 'undefined') {
+    Handlebars.registerHelper('friends', function() {
+      var user = Meteor.user();
+      var friends = Session.get("friends").map(function(friend) {
+        return friend.name;
+      });
+      // Allow the user to be a friend of themself.
+      if (user)
+        friends.push(user.profile.name);
+      return JSON.stringify(friends);
+    });
     Handlebars.registerHelper('adminUser', isAdminUser);
   }
   
@@ -123,7 +136,28 @@ if (Meteor.isClient) (function setupClient() {
     }
   });
   
+  Template.badgeType.nominating = function() {
+    return (this._id === Session.get("nominating"));
+  };
+  
   Template.badgeType.events({
+    'click .nominate': function(evt, template) {
+      Session.set("nominating", this._id);
+      Meteor.flush();
+      template.find(".friends-list").focus();
+      $.ajax({
+        url: "https://graph.facebook.com/me/friends?access_token=" +
+             Meteor.user().services.facebook.accessToken,
+        crossDomain: true,
+        dataType: "json",
+        error: function(req) {
+          console.log("CRAP", req);
+        },
+        success: function(data) {
+          Session.set("friends", data.data);
+        }
+      });
+    },
     'click .remove-badgetype': function(evt) {
       BadgeTypes.remove(this._id);
     }
@@ -150,6 +184,17 @@ if (Meteor.isServer) (function setupServer() {
   });
   Meteor.publish("rockabadge.badgeTypes", function() {
     return BadgeTypes.find();
+  });
+  Meteor.publish("rockabadge.facebookInfo", function() {
+    if (this.userId)
+      return Meteor.users.find({
+        _id: this.userId
+      }, {
+        fields: {
+          'services.facebook.id': 1,
+          'services.facebook.accessToken': 1
+        }
+      });
   });
   Meteor.publish("rockabadge.adminUser", function() {
     if (this.userId)

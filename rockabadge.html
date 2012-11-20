@@ -1,0 +1,36 @@
+<head>
+  <title>rockabadge</title>
+</head>
+
+<body>
+  {{loginButtons}}
+  {{> badgeTypeList}}
+</body>
+
+<template name="badgeTypeList">
+  <h2>Badge Types</h2>
+  <ul>
+    {{#each badgeTypes}}
+      {{> badgeType}}
+    {{/each}}
+  </ul>
+  {{#if adminUser}}
+  <button class="add-badgetype">Add a Badge Type</button>
+  {{/if}}
+</template>
+
+<template name="badgeType">
+  <li>
+    {{#if editing}}
+    <span class="edit">
+      <input id="name-edit" type="text" value="{{name}}">
+    </span>
+    {{else}}
+    <span class="display">{{name}}</span>
+    {{/if}}
+    </span>
+    {{#if adminUser}}
+    <button class="remove-badgetype">Remove</button>
+    {{/if}}
+  </li>
+</template>

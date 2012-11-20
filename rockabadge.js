@@ -78,6 +78,14 @@ if (Meteor.isClient) (function setupClient() {
       };
     return events;
   };
+
+  makeEditableWhenClicked({
+    name: "badgeTypeDesc",
+    allow: isAdminUser,
+    save: function(value) {
+      BadgeTypes.update({_id: this._id}, {$set: {description: value}});
+    }
+  });
   
   makeEditableWhenClicked({
     name: "badgeTypeName",

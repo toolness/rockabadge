@@ -27,9 +27,20 @@
   {{/if}}
 </template>
 
+<template name="badgeTypeDesc">
+  <div>
+  {{#if editing}}
+  <textarea id="edit">{{description}}</textarea>
+  {{else}}
+  <span class="display">{{description}}</span>
+  {{/if}}
+  </div>
+</template>
+
 <template name="badgeType">
   <li>
     {{> badgeTypeName}}
+    {{> badgeTypeDesc}}
     {{#if adminUser}}
     <button class="remove-badgetype">Remove</button>
     {{/if}}

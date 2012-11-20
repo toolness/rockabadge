@@ -66,7 +66,8 @@ if (Meteor.isClient) (function setupClient() {
           // escape = cancel
           cancel.call(this, evt);
 
-        } else if (evt.type === "keyup" && evt.which === 13 ||
+        } else if (evt.type === "keyup" && evt.which === 13 
+                                        && !evt.shiftKey ||
                    evt.type === "focusout") {
           // blur/return/enter = ok/submit if non-empty
           var value = String(evt.target.value || "");

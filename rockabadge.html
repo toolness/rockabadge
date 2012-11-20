@@ -15,7 +15,7 @@
     {{/each}}
   </ul>
   {{#if adminUser}}
-  <button class="add-badgetype">Add a Badge Type</button>
+  <button class="btn add-badgetype">Add a Badge Type</button>
   {{/if}}
 </template>
 
@@ -23,7 +23,7 @@
   {{#if editing}}
   <input id="edit" type="text" value="{{image}}">
   {{else}}
-  <img class="badge display {{editable}}" src="{{image}}" title="Badge image">
+  <img class="badge-image display {{editable}}" src="{{image}}" title="Badge image">
   {{/if}}
 </template>
 
@@ -51,7 +51,7 @@
     {{> badgeTypeName}}
     {{> badgeTypeDesc}}
     {{#if adminUser}}
-    <button class="remove-badgetype">Remove</button>
+    <button class="btn btn-mini btn-danger remove-badgetype">Remove</button>
     {{/if}}
   </li>
 </template>

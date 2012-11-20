@@ -13,18 +13,13 @@
   font-weight: bold;
 }
 
-img.badge.display {
+img.badge-image.display {
   width: 64px;
   height: 64px;
 }
 
 #edit {
-  width: 100%;
-  font-family: inherit;
-  font-size: inherit;
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
+  width: 80%;
 }
 
 ul.badgeTypes {

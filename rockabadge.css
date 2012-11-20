@@ -1,7 +1,16 @@
+.display.editable:hover {
+  background: lightyellow;
+  cursor: pointer;
+}
+
 .display {
-  min-width: 16px;
-  min-height: 16px;
+  min-height: 1em;
+  white-space: pre-wrap;
   display: block;
+}
+
+.badge-name.display {
+  font-weight: bold;
 }
 
 img.badge.display {
@@ -11,6 +20,8 @@ img.badge.display {
 
 #edit {
   width: 100%;
+  font-family: inherit;
+  font-size: inherit;
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;

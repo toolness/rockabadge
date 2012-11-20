@@ -19,6 +19,11 @@ if (Meteor.isClient) (function setupClient() {
     
     Session.set(keyName, null);
     
+    Template[name].editable = function() {
+      if (allow.call(this))
+        return "editable";
+    };
+    
     Template[name].editing = function() {
       return (this._id == Session.get(keyName));
     };

@@ -86,6 +86,14 @@ if (Meteor.isClient) (function setupClient() {
       BadgeTypes.update({_id: this._id}, {$set: {description: value}});
     }
   });
+
+  makeEditableWhenClicked({
+    name: "badgeTypeImage",
+    allow: isAdminUser,
+    save: function(value) {
+      BadgeTypes.update({_id: this._id}, {$set: {image: value}});
+    }
+  });
   
   makeEditableWhenClicked({
     name: "badgeTypeName",
@@ -102,9 +110,9 @@ if (Meteor.isClient) (function setupClient() {
   Template.badgeTypeList.events({
     'click .add-badgetype': function(evt) {
       BadgeTypes.insert({
-        name: "A new badge",
-        image: "",
-        description: "This is a cool new badge."
+        name: "Badge name",
+        image: Meteor.absoluteUrl("gray-badge.png"),
+        description: "Badge description"
       });
     }
   });

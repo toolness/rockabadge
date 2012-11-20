@@ -9,7 +9,7 @@
 
 <template name="badgeTypeList">
   <h2>Badge Types</h2>
-  <ul>
+  <ul class="badgeTypes">
     {{#each badgeTypes}}
       {{> badgeType}}
     {{/each}}
@@ -19,11 +19,19 @@
   {{/if}}
 </template>
 
+<template name="badgeTypeImage">
+  {{#if editing}}
+  <input id="edit" type="text" value="{{image}}">
+  {{else}}
+  <img class="badge display" src="{{image}}" title="Badge image">
+  {{/if}}
+</template>
+
 <template name="badgeTypeName">
   {{#if editing}}
   <input id="edit" type="text" value="{{name}}">
   {{else}}
-  <span class="display">{{name}}</span>
+  <div class="display" title="Badge name">{{name}}</div>
   {{/if}}
 </template>
 
@@ -32,13 +40,14 @@
   {{#if editing}}
   <textarea id="edit">{{description}}</textarea>
   {{else}}
-  <span class="display">{{description}}</span>
+  <div class="display" title="Badge description">{{description}}</div>
   {{/if}}
   </div>
 </template>
 
 <template name="badgeType">
   <li>
+    {{> badgeTypeImage}}
     {{> badgeTypeName}}
     {{> badgeTypeDesc}}
     {{#if adminUser}}

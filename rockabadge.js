@@ -169,14 +169,16 @@ if (Meteor.isServer) (function setupServer() {
     return !!Meteor.users.findOne({_id: userId}).isAdmin;
   };
   
-  Accounts.loginServiceConfiguration.remove({
-    service: "facebook"
-  });
-  Accounts.loginServiceConfiguration.insert({
-    service: "facebook",
-    appId: process.env["FB_APP_ID"],
-    secret: process.env["FB_APP_SECRET"]
-  });
+  if (process.env["FB_APP_ID"]) {
+    Accounts.loginServiceConfiguration.remove({
+      service: "facebook"
+    });
+    Accounts.loginServiceConfiguration.insert({
+      service: "facebook",
+      appId: process.env["FB_APP_ID"],
+      secret: process.env["FB_APP_SECRET"]
+    });
+  }
   BadgeTypes.allow({
     insert: isAdminUser,
     remove: isAdminUser,

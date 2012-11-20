@@ -3,13 +3,46 @@ var BadgeTypes = new Meteor.Collection("badgetypes");
 if (Meteor.isClient) (function setupClient() {
   Meteor.subscribe("rockabadge.adminUser");
   Meteor.subscribe("rockabadge.badgeTypes");
-  Session.set("editing_badgeType", null);
   
   var isAdminUser = function() {
     var user = Meteor.user();
     if (!user)
       return false;
     return !!user.isAdmin;
+  };
+  
+  var makeEditableWhenClicked = function(options) {
+    var name = options.name;
+    var allow = options.allow || function() { return true; };
+    var save = options.save;
+    var keyName = "editing_" + name;
+    
+    Session.set(keyName, null);
+    
+    Template[name].editing = function() {
+      return (this._id == Session.get(keyName));
+    };
+
+    Template[name].events(okCancelEvents('#edit', {
+      ok: function(value) {
+        save.call(this, value);
+        Session.set(keyName, null);
+      },
+      cancel: function() {
+        Session.set(keyName, null);
+      }
+    }));
+
+    Template[name].events({
+      'click .display': function(evt, tmpl) {
+        if (allow.call(this)) {
+          Session.set(keyName, this._id);
+          Meteor.flush();
+          tmpl.find("#edit").focus();
+          tmpl.find("#edit").select();
+        }
+      }
+    });
   };
   
   if (typeof Handlebars !== 'undefined') {
@@ -46,6 +79,14 @@ if (Meteor.isClient) (function setupClient() {
     return events;
   };
   
+  makeEditableWhenClicked({
+    name: "badgeTypeName",
+    allow: isAdminUser,
+    save: function(value) {
+      BadgeTypes.update({_id: this._id}, {$set: {name: value}});
+    }
+  });
+  
   Template.badgeTypeList.badgeTypes = function() {
     return BadgeTypes.find();
   };
@@ -60,29 +101,7 @@ if (Meteor.isClient) (function setupClient() {
     }
   });
   
-  Template.badgeType.editing = function() {
-    return (this._id == Session.get("editing_badgeType"));
-  };
-
-  Template.badgeType.events(okCancelEvents('#name-edit', {
-    ok: function(value) {
-      BadgeTypes.update({_id: this._id}, {$set: {name: value}});
-      Session.set("editing_badgeType", null);
-    },
-    cancel: function() {
-      Session.set("editing_badgeType", null);
-    }
-  }));
-  
   Template.badgeType.events({
-    'click .display': function(evt, tmpl) {
-      if (isAdminUser()) {
-        Session.set("editing_badgeType", this._id);
-        Meteor.flush();
-        tmpl.find("#name-edit").focus();
-        tmpl.find("#name-edit").select();
-      }
-    },
     'click .remove-badgetype': function(evt) {
       BadgeTypes.remove(this._id);
     }

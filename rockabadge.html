@@ -19,16 +19,17 @@
   {{/if}}
 </template>
 
+<template name="badgeTypeName">
+  {{#if editing}}
+  <input id="edit" type="text" value="{{name}}">
+  {{else}}
+  <span class="display">{{name}}</span>
+  {{/if}}
+</template>
+
 <template name="badgeType">
   <li>
-    {{#if editing}}
-    <span class="edit">
-      <input id="name-edit" type="text" value="{{name}}">
-    </span>
-    {{else}}
-    <span class="display">{{name}}</span>
-    {{/if}}
-    </span>
+    {{> badgeTypeName}}
     {{#if adminUser}}
     <button class="remove-badgetype">Remove</button>
     {{/if}}

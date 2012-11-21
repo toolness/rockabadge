@@ -220,8 +220,9 @@ if (Meteor.isClient) (function setupClient() {
   });
   
   Template.nominations.isNominator = function() {
-    return ((Meteor.user().services.facebook.id == this.nominator.id &&
-             this.nominator.id != this.nominee.id) || isAdminUser());
+    var userId = Meteor.user().services.facebook.id;
+    return (userId != this.nominee.id &&
+            (userId == this.nominator.id || isAdminUser()));
   };
   
   Template.nominations.nominations = function() {

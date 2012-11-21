@@ -1,9 +1,11 @@
 var BadgeTypes = new Meteor.Collection("badgetypes");
+var Nominations = new Meteor.Collection("nominations");
 
 if (Meteor.isClient) (function setupClient() {
   Meteor.subscribe("rockabadge.adminUser");
   Meteor.subscribe("rockabadge.facebookInfo");
   Meteor.subscribe("rockabadge.badgeTypes");
+  Meteor.subscribe("rockabadge.nominations");
   Session.set("nominating", null);
   Session.set("friends", []);
   
@@ -151,6 +153,38 @@ if (Meteor.isClient) (function setupClient() {
       BadgeTypes.remove(this._id);
     }
   });
+  
+  Template.nominateForm.events({
+    'click .nominate': function(evt, template) {
+      var user = Meteor.user();
+      var friends = user.friends || [];
+      var nominee = template.find('.friends-list').value;
+      var nomineeID = null;
+      
+      if (!nominee)
+        return;
+      
+      if (nominee == user.profile.name) {
+        nomineeID = user.services.facebook.id;
+      } else {
+        for (var i = 0; i < friends.length; i++) {
+          if (friends[i].name == nominee) {
+            nomineeID = friends[i].id;
+          }
+        }
+      }
+      if (nomineeID === null)
+        return alert("Not a valid user.");
+      Meteor.call('nominate', nomineeID, this._id, function(err, result) {
+        if (err)
+          return alert("error nominating!");
+        if (result)
+          return alert("nomination successful!");
+        else
+          return alert("you've already nominated this person for the badge.");
+      });
+    }
+  });
 })();
 
 if (Meteor.isServer) (function setupServer() {
@@ -174,6 +208,26 @@ if (Meteor.isServer) (function setupServer() {
     update: isAdminUser
   });
   Meteor.methods({
+    nominate: function(nomineeFacebookId, badgeId) {
+      if (this.userId) {
+        var userFacebookId = Meteor.users.findOne({
+          _id: this.userId
+        }).services.facebook.id;
+        var nomination = Nominations.findOne({
+          nominator: userFacebookId,
+          nominee: nomineeFacebookId,
+          badge: badgeId
+        });
+        if (nomination)
+          return false;
+        Nominations.insert({
+          nominator: userFacebookId,
+          nominee: nomineeFacebookId,
+          badge: badgeId
+        });
+        return true;
+      }
+    },
     refreshFriends: function() {
       if (this.userId) {
         var userId = this.userId;
@@ -193,6 +247,16 @@ if (Meteor.isServer) (function setupServer() {
           }
         });
       }
+    }
+  });
+  Meteor.publish("rockabadge.nominations", function() {
+    if (this.userId) {
+      var userFacebookId = Meteor.users.findOne({
+        _id: this.userId
+      }).services.facebook.id;
+      return Nominations.find({
+        $or: [{nominator: userFacebookId}, {nominee: userFacebookId}]
+      });
     }
   });
   Meteor.publish("rockabadge.badgeTypes", function() {

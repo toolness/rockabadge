@@ -2,7 +2,9 @@ var BadgeTypes = new Meteor.Collection("badgetypes");
 var Nominations = new Meteor.Collection("nominations");
 
 var getUser = function(userId) {
-  return userId ? Meteor.users.findOne({_id: userId}) : Meteor.user();
+  if (typeof(userId) == "string")
+    return Meteor.users.findOne({_id: userId});
+  return Meteor.user();
 };
 
 var isAdminUser = function(userId) {

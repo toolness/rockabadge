@@ -88,7 +88,13 @@
   <ul>
     {{#each nominations}}
     <li>{{> fb-link nominator}} nominated {{> fb-link nominee}}
-      for this badge on {{nicedate date}}.</li>
+      for this badge on {{nicedate date}}.
+      <div class="actions">
+        {{#if isNominator}}
+        <button class="btn btn-mini send-nominee-message">Send Message to {{nominee.name}}</button>
+        {{/if}}
+      </div>
+    </li>
     {{/each}}
   </ul>
 </template>

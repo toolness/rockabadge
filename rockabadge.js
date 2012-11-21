@@ -197,14 +197,41 @@ if (Meteor.isClient) (function setupClient() {
       );
     }
   });
+
+  Template.nominations.events({
+    'click .send-nominee-message': function(evt, template) {
+      var appId = Accounts.loginServiceConfiguration.findOne({
+        service: "facebook"
+      }).appId;
+      var badge = BadgeTypes.findOne({_id: this.badge});
+      var link = encodeURIComponent(Meteor.absoluteUrl().match(/localhost/) ?
+                 "http://rockawayhelp.com/" : Meteor.absoluteUrl());
+      var picture = encodeURIComponent(badge.image);
+      var name = encodeURIComponent(badge.name);
+      var description = encodeURIComponent(badge.description);
+      var redirect_uri = encodeURIComponent(Meteor.absoluteUrl("close"));
+      var url = "https://www.facebook.com/dialog/send?app_id=" + appId +
+                "&name=" + name + "&link=" + link + "&display=popup" +
+                "&picture=" + picture + "&description=" + description +
+                "&redirect_uri=" + redirect_uri + "&to=" +
+                this.nominee.id;
+      window.open(url, undefined, "width=580,height=400");
+    }
+  });
+  
+  Template.nominations.isNominator = function() {
+    return ((Meteor.user().services.facebook.id == this.nominator.id &&
+             this.nominator.id != this.nominee.id) || isAdminUser());
+  };
   
   Template.nominations.nominations = function() {
-    var badgeId = this._id;
     var userFacebookId = Meteor.user().services.facebook.id;
     var noms = Nominations.find({badge: this._id});
-    console.log(noms.count());
     return noms;
   };
+  
+  if (window.location.pathname == "/close")
+    window.close();
 })();
 
 if (Meteor.isServer) (function setupServer() {

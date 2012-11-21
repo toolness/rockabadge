@@ -154,7 +154,9 @@ if (Meteor.isClient) (function setupClient() {
       Meteor.call('refreshFriends');
     },
     'click .remove-badgetype': function(evt) {
-      BadgeTypes.remove(this._id);
+      if (confirm("Are you sure you want to delete this badge type? " +
+                  "This action cannot be undone."))
+        BadgeTypes.remove(this._id);
     }
   });
   

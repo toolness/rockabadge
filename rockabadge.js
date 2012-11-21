@@ -335,6 +335,58 @@ if (Meteor.isServer) (function setupServer() {
       }
     }
   });
+  __meteor_bootstrap__.app.use(function(req, res, next) {
+    var assertionRE = /^\/assertions\/([\w\-]+)$/;
+    var match = req.url.match(assertionRE);
+    if (match) {
+      return Fiber(function() {
+        var badge = Nominations.findOne({_id: match[1]});
+        if (!badge) {
+          res.writeHead(404);
+          return res.end("assertion not found");
+        }
+        if (!badge.nominator.isAdmin) {
+          res.writeHead(404);
+          return res.end("id is a nomination from non-admin");
+        }
+        var user = Meteor.users.findOne({
+          'services.facebook.id': badge.nominee.id
+        });
+        if (!user) {
+          res.writeHead(404);
+          return res.end("badge recipient must log in");
+        }
+        var badgeType = BadgeTypes.findOne({_id: badge.badge});
+        var email = user.services.facebook.email;
+        var salt = badge.date.toString();
+        var crypto = __meteor_bootstrap__.require('crypto');
+        var sum = crypto.createHash('sha256');
+        sum.update(email + salt);
+        var hash = 'sha256$' + sum.digest('hex');
+        var assertion = {
+          recipient: hash,
+          salt: salt,
+          badge: {
+            version: "0.5.0",
+            name: badgeType.name,
+            image: badgeType.image,
+            description: badgeType.description,
+            criteria: Meteor.absoluteUrl(),
+            issuer: {
+              origin: Meteor.absoluteUrl().slice(0, -1),
+              name: "Rockawayhelp Badges"
+            }
+          }
+        };
+        var payload = JSON.stringify(assertion, null, 2);
+        res.writeHead(200, {
+          'Content-Type': 'application/json'
+        });
+        return res.end(payload);
+      }).run();
+    }
+    next();
+  });
   Meteor.publish("rockabadge.nominations", function() {
     if (this.userId)
       return Nominations.find();

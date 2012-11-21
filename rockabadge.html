@@ -103,6 +103,12 @@
         {{#if isNominator}}
         <button class="btn btn-mini send-nominee-message">Send Message to {{nominee.name}}</button>
         {{/if}}
+        {{#if isAwarded}}
+        {{else}}
+        {{#if adminUser}}
+        <button class="btn btn-mini award-badge">Award Badge</button>
+        {{/if}}
+        {{/if}}
       </div>
     </li>
     {{/each}}

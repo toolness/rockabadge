@@ -196,7 +196,19 @@ if (Meteor.isClient) (function setupClient() {
     }
   });
 
+  Template.nominations.isAwarded = function() {
+    var badge = Nominations.findOne({
+      'nominee.id': this.nominee.id,
+      'nominator.isAdmin': true,
+      badge: this.badge
+    });
+    return !!badge;
+  };
+  
   Template.nominations.events({
+    'click .award-badge': function(evt, template) {
+      Meteor.call('nominate', this.nominee.name, this.nominee.id, this.badge);
+    },
     'click .send-nominee-message': function(evt, template) {
       var appId = Accounts.loginServiceConfiguration.findOne({
         service: "facebook"
@@ -303,17 +315,8 @@ if (Meteor.isServer) (function setupServer() {
     }
   });
   Meteor.publish("rockabadge.nominations", function() {
-    if (this.userId) {
-      if (isAdminUser(this.userId))
-        return Nominations.find();
-      var userFacebookId = Meteor.users.findOne({
-        _id: this.userId
-      }).services.facebook.id;
-      return Nominations.find({
-        $or: [{'nominator.id': userFacebookId},
-              {'nominee.id': userFacebookId}]
-      });
-    }
+    if (this.userId)
+      return Nominations.find();
   });
   Meteor.publish("rockabadge.badgeTypes", function() {
     return BadgeTypes.find();

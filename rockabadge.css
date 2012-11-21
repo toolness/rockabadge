@@ -30,3 +30,7 @@ ul.badgeTypes {
   list-style-type: none;
 }
 
+img.fb-avatar-tiny {
+  width: 16px;
+  height: 16px;
+}

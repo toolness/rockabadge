@@ -56,6 +56,10 @@ if (Meteor.isClient) (function setupClient() {
   };
   
   if (typeof Handlebars !== 'undefined') {
+    Handlebars.registerHelper('nicedate', function(date) {
+      date = new Date(date);
+      return date.toLocaleDateString();
+    });
     Handlebars.registerHelper('friends', function() {
       var user = Meteor.user();
       var friends = (user.friends || []).map(function(friend) {
@@ -177,6 +181,7 @@ if (Meteor.isClient) (function setupClient() {
         return alert("Not a valid user.");
       Meteor.call('nominate', nominee, nomineeID, this._id,
         function(err, result) {
+          Session.set("nominating", null);
           if (err)
             return alert("error nominating!");
           if (result)
@@ -187,6 +192,18 @@ if (Meteor.isClient) (function setupClient() {
       );
     }
   });
+  
+  Template.nominations.nominations = function() {
+    var badgeId = this._id;
+    var userFacebookId = Meteor.user().services.facebook.id;
+    var noms = Nominations.find({
+      badge: this._id,
+      $or: [{'nominator.id': userFacebookId},
+            {'nominee.id': userFacebookId}]
+    });
+    console.log(noms.count());
+    return noms;
+  };
 })();
 
 if (Meteor.isServer) (function setupServer() {
@@ -230,7 +247,8 @@ if (Meteor.isServer) (function setupServer() {
             id: nomineeFacebookId,
             name: nomineeName
           },
-          badge: badgeId
+          badge: badgeId,
+          date: new Date()
         });
         return true;
       }

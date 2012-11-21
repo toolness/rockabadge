@@ -72,5 +72,19 @@
     {{#if nominating}}
     {{> nominateForm}}
     {{/if}}
+    {{#if currentUser}}
+    {{> nominations }}
+    {{/if}}
   </li>
+</template>
+
+<template name="nominations">
+  <ul>
+    {{#each nominations}}
+    <li><img class="fb-avatar-tiny" src="//graph.facebook.com/{{nominator.id}}/picture"> 
+      <a href=" http://www.facebook.com/profile.php?id={{nominator.id}}" target="_blank">{{nominator.name}}</a> nominated 
+      <img class="fb-avatar-tiny" src="//graph.facebook.com/{{nominee.id}}/picture">
+      <a href=" http://www.facebook.com/profile.php?id={{nominee.id}}" target="_blank">{{nominee.name}}</a> for this badge on {{nicedate date}}.</li>
+    {{/each}}
+  </ul>
 </template>

@@ -175,14 +175,16 @@ if (Meteor.isClient) (function setupClient() {
       }
       if (nomineeID === null)
         return alert("Not a valid user.");
-      Meteor.call('nominate', nomineeID, this._id, function(err, result) {
-        if (err)
-          return alert("error nominating!");
-        if (result)
-          return alert("nomination successful!");
-        else
-          return alert("you've already nominated this person for the badge.");
-      });
+      Meteor.call('nominate', nominee, nomineeID, this._id,
+        function(err, result) {
+          if (err)
+            return alert("error nominating!");
+          if (result)
+            return alert("nomination successful!");
+          else
+            return alert("you've already nominated this person.");
+        }
+      );
     }
   });
 })();
@@ -208,21 +210,26 @@ if (Meteor.isServer) (function setupServer() {
     update: isAdminUser
   });
   Meteor.methods({
-    nominate: function(nomineeFacebookId, badgeId) {
+    nominate: function(nomineeName, nomineeFacebookId, badgeId) {
       if (this.userId) {
-        var userFacebookId = Meteor.users.findOne({
-          _id: this.userId
-        }).services.facebook.id;
+        var user = Meteor.users.findOne({_id: this.userId});
+        var userFacebookId = user.services.facebook.id;
         var nomination = Nominations.findOne({
-          nominator: userFacebookId,
-          nominee: nomineeFacebookId,
+          'nominator.id': userFacebookId,
+          'nominee.id': nomineeFacebookId,
           badge: badgeId
         });
         if (nomination)
           return false;
         Nominations.insert({
-          nominator: userFacebookId,
-          nominee: nomineeFacebookId,
+          nominator: {
+            id: userFacebookId,
+            name: user.profile.name
+          },
+          nominee: {
+            id: nomineeFacebookId,
+            name: nomineeName
+          },
           badge: badgeId
         });
         return true;
@@ -255,7 +262,8 @@ if (Meteor.isServer) (function setupServer() {
         _id: this.userId
       }).services.facebook.id;
       return Nominations.find({
-        $or: [{nominator: userFacebookId}, {nominee: userFacebookId}]
+        $or: [{'nominator.id': userFacebookId},
+              {'nominee.id': userFacebookId}]
       });
     }
   });

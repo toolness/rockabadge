@@ -268,7 +268,8 @@ if (Meteor.isServer) (function setupServer() {
         Nominations.insert({
           nominator: {
             id: userFacebookId,
-            name: user.profile.name
+            name: user.profile.name,
+            isAdmin: user.isAdmin
           },
           nominee: {
             id: nomineeFacebookId,

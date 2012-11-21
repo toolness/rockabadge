@@ -11,9 +11,13 @@
 <template name="nominateForm">
   <div class="well">
     <button type="button" class="close">×</button>
+    {{#if adminUser}}
+    <h4>Award a Friend the {{name}} Badge</h4>
+    {{else}}
     <h4>Nominate a Friend for the {{name}} Badge</h4>
+    {{/if}}
     <input type="text" placeholder="Enter friend name" class="friends-list" data-provide="typeahead" data-source="{{friends}}">
-    <button class="btn btn-primary nominate">Nominate</button>
+    <button class="btn btn-primary nominate">{{#if adminUser}}Award{{else}}Nominate{{/if}}</button>
   </div>
 </template>
 
@@ -66,7 +70,7 @@
     {{#if currentUser}}
       {{#if nominating}}
       {{else}}
-      <button class="btn btn-mini nominate">Nominate&hellip;</button>
+      <button class="btn btn-mini nominate">{{#if adminUser}}Award{{else}}Nominate{{/if}}&hellip;</button>
       {{/if}}
     {{/if}}
     </div>
@@ -87,8 +91,14 @@
 <template name="nominations">
   <ul>
     {{#each nominations}}
-    <li>{{> fb-link nominator}} nominated {{> fb-link nominee}}
-      for this badge on {{nicedate date}}.
+    <li>
+      {{#if nominator.isAdmin}}
+        {{> fb-link nominator}} awarded {{> fb-link nominee}}
+      {{else}}
+        {{> fb-link nominator}} nominated {{> fb-link nominee}}
+        for 
+      {{/if}}  
+      this badge on {{nicedate date}}.
       <div class="actions">
         {{#if isNominator}}
         <button class="btn btn-mini send-nominee-message">Send Message to {{nominee.name}}</button>

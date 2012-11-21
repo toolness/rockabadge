@@ -195,6 +195,13 @@ if (Meteor.isClient) (function setupClient() {
     }
   });
 
+  Template.nominations.isRecipient = function() {
+    var facebookId = Meteor.user().services.facebook.id;
+    return (this.nominee.id == facebookId &&
+            this.nominator.isAdmin &&
+            Session.get("OpenBadges_loaded"));
+  };
+  
   Template.nominations.isRevocable = function() {
     if (isAdminUser())
       return true;
@@ -212,6 +219,10 @@ if (Meteor.isClient) (function setupClient() {
   };
   
   Template.nominations.events({
+    'click .push-badge': function(evt) {
+      var url = Meteor.absoluteUrl('assertions/' + this._id);
+      OpenBadges.issue([url]);
+    },
     'click .revoke-nomination': function(evt) {
       Nominations.remove({_id: this._id});
     },
@@ -249,6 +260,17 @@ if (Meteor.isClient) (function setupClient() {
     var noms = Nominations.find({badge: this._id});
     return noms;
   };
+  
+  if (!Session.get("OpenBadges_loaded"))
+    (function() {
+      var script = document.createElement('script');
+      script.setAttribute("src", "http://beta.openbadges.org/issuer.js");
+      script.setAttribute("async", "");
+      script.onload = function() {
+        Session.set("OpenBadges_loaded", true);
+      };
+      document.documentElement.appendChild(script);
+    })();
   
   if (window.location.pathname == "/close")
     window.close();

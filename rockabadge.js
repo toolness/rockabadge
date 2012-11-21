@@ -276,7 +276,7 @@ if (Meteor.isServer) (function setupServer() {
             name: nomineeName
           },
           badge: badgeId,
-          date: new Date()
+          date: Date.now()
         });
         return true;
       }

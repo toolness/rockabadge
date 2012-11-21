@@ -196,6 +196,13 @@ if (Meteor.isClient) (function setupClient() {
     }
   });
 
+  Template.nominations.isRevocable = function() {
+    if (isAdminUser())
+      return true;
+    var facebookId = Meteor.user().services.facebook.id;
+    return (this.nominator.id == facebookId);
+  };
+
   Template.nominations.isAwarded = function() {
     var badge = Nominations.findOne({
       'nominee.id': this.nominee.id,
@@ -206,6 +213,9 @@ if (Meteor.isClient) (function setupClient() {
   };
   
   Template.nominations.events({
+    'click .revoke-nomination': function(evt) {
+      Nominations.remove({_id: this._id});
+    },
     'click .award-badge': function(evt, template) {
       Meteor.call('nominate', this.nominee.name, this.nominee.id, this.badge);
     },
@@ -260,6 +270,18 @@ if (Meteor.isServer) (function setupServer() {
       secret: process.env["FB_APP_SECRET"]
     });
   }
+  Nominations.allow({
+    remove: function(userId, docs) {
+      if (isAdminUser(userId))
+        return true;
+      var facebookId = Meteor.users.findOne({_id: userId})
+        .services.facebook.id;
+      for (var i = 0; i < docs.length; i++)
+        if (docs[i].nominator.id != facebookId)
+          return false;
+      return true;
+    }
+  });
   BadgeTypes.allow({
     insert: isAdminUser,
     remove: isAdminUser,

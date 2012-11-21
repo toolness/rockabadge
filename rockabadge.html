@@ -100,6 +100,9 @@
       {{/if}}  
       this badge on {{nicedate date}}.
       <div class="actions">
+        {{#if isRevocable}}
+        <button class="btn btn-mini btn-danger revoke-nomination">Revoke</button>
+        {{/if}}
         {{#if isNominator}}
         <button class="btn btn-mini send-nominee-message">Send Message to {{nominee.name}}</button>
         {{/if}}

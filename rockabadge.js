@@ -1,19 +1,17 @@
 var BadgeTypes = new Meteor.Collection("badgetypes");
 var Nominations = new Meteor.Collection("nominations");
 
+var isAdminUser = function(userId) {
+  var user = userId ? Meteor.users.findOne({_id: userId}) : Meteor.user();
+  return !!((user || {}).isAdmin);
+};
+
 if (Meteor.isClient) (function setupClient() {
   Meteor.subscribe("rockabadge.adminUser");
   Meteor.subscribe("rockabadge.facebookInfo");
   Meteor.subscribe("rockabadge.badgeTypes");
   Meteor.subscribe("rockabadge.nominations");
   Session.set("nominating", null);
-  
-  var isAdminUser = function() {
-    var user = Meteor.user();
-    if (!user)
-      return false;
-    return !!user.isAdmin;
-  };
   
   var makeEditableWhenClicked = function(options) {
     var name = options.name;
@@ -276,11 +274,7 @@ if (Meteor.isClient) (function setupClient() {
     window.close();
 })();
 
-if (Meteor.isServer) (function setupServer() {
-  var isAdminUser = function(userId) {
-    return !!Meteor.users.findOne({_id: userId}).isAdmin;
-  };
-  
+if (Meteor.isServer) (function setupServer() {  
   if (process.env["FB_APP_ID"]) {
     Accounts.loginServiceConfiguration.remove({
       service: "facebook"

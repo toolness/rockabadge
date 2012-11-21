@@ -196,11 +196,7 @@ if (Meteor.isClient) (function setupClient() {
   Template.nominations.nominations = function() {
     var badgeId = this._id;
     var userFacebookId = Meteor.user().services.facebook.id;
-    var noms = Nominations.find({
-      badge: this._id,
-      $or: [{'nominator.id': userFacebookId},
-            {'nominee.id': userFacebookId}]
-    });
+    var noms = Nominations.find({badge: this._id});
     console.log(noms.count());
     return noms;
   };
@@ -276,6 +272,8 @@ if (Meteor.isServer) (function setupServer() {
   });
   Meteor.publish("rockabadge.nominations", function() {
     if (this.userId) {
+      if (isAdminUser(this.userId))
+        return Nominations.find();
       var userFacebookId = Meteor.users.findOne({
         _id: this.userId
       }).services.facebook.id;

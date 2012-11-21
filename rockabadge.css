@@ -1,3 +1,7 @@
+body {
+  margin: 1em;
+}
+
 .display.editable:hover {
   background: lightyellow;
   cursor: pointer;
@@ -28,6 +32,7 @@ img.badge-image.display {
 
 ul.badgeTypes {
   list-style-type: none;
+  margin: 0;
 }
 
 img.fb-avatar-tiny {

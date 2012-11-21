@@ -7,7 +7,6 @@ if (Meteor.isClient) (function setupClient() {
   Meteor.subscribe("rockabadge.badgeTypes");
   Meteor.subscribe("rockabadge.nominations");
   Session.set("nominating", null);
-  Session.set("friends", []);
   
   var isAdminUser = function() {
     var user = Meteor.user();

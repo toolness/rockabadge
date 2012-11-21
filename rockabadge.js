@@ -189,9 +189,7 @@ if (Meteor.isClient) (function setupClient() {
           Session.set("nominating", null);
           if (err)
             return alert("error nominating!");
-          if (result)
-            return alert("nomination successful!");
-          else
+          if (!result)
             return alert("you've already nominated this person.");
         }
       );

@@ -161,6 +161,9 @@ if (Meteor.isClient) (function setupClient() {
   });
   
   Template.nominateForm.events({
+    'click .close': function() {
+      Session.set("nominating", null);
+    },
     'click .nominate': function(evt, template) {
       var user = Meteor.user();
       var friends = user.friends || [];

@@ -1,9 +1,24 @@
 var BadgeTypes = new Meteor.Collection("badgetypes");
 var Nominations = new Meteor.Collection("nominations");
 
+var getUser = function(userId) {
+  return userId ? Meteor.users.findOne({_id: userId}) : Meteor.user();
+};
+
 var isAdminUser = function(userId) {
-  var user = userId ? Meteor.users.findOne({_id: userId}) : Meteor.user();
-  return !!((user || {}).isAdmin);
+  return !!((getUser(userId) || {}).isAdmin);
+};
+
+var areNominationsRevocable = function(userId, docs) {
+  var user = getUser(userId);
+  if (!user)
+    return false;
+  if (user.isAdmin)
+    return true;
+  for (var i = 0; i < docs.length; i++)
+    if (docs[i].nominator.id != user.services.facebook.id)
+      return false;
+  return true;
 };
 
 if (Meteor.isClient) (function setupClient() {
@@ -201,10 +216,7 @@ if (Meteor.isClient) (function setupClient() {
   };
   
   Template.nominations.isRevocable = function() {
-    if (isAdminUser())
-      return true;
-    var facebookId = Meteor.user().services.facebook.id;
-    return (this.nominator.id == facebookId);
+    return areNominationsRevocable(Meteor.userId(), [this]);
   };
 
   Template.nominations.isAwarded = function() {
@@ -285,18 +297,7 @@ if (Meteor.isServer) (function setupServer() {
       secret: process.env["FB_APP_SECRET"]
     });
   }
-  Nominations.allow({
-    remove: function(userId, docs) {
-      if (isAdminUser(userId))
-        return true;
-      var facebookId = Meteor.users.findOne({_id: userId})
-        .services.facebook.id;
-      for (var i = 0; i < docs.length; i++)
-        if (docs[i].nominator.id != facebookId)
-          return false;
-      return true;
-    }
-  });
+  Nominations.allow({remove: areNominationsRevocable});
   BadgeTypes.allow({
     insert: isAdminUser,
     remove: isAdminUser,

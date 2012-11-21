@@ -56,7 +56,7 @@ if (Meteor.isClient) (function setupClient() {
   if (typeof Handlebars !== 'undefined') {
     Handlebars.registerHelper('friends', function() {
       var user = Meteor.user();
-      var friends = Session.get("friends").map(function(friend) {
+      var friends = (user.friends || []).map(function(friend) {
         return friend.name;
       });
       // Allow the user to be a friend of themself.
@@ -145,18 +145,7 @@ if (Meteor.isClient) (function setupClient() {
       Session.set("nominating", this._id);
       Meteor.flush();
       template.find(".friends-list").focus();
-      $.ajax({
-        url: "https://graph.facebook.com/me/friends?access_token=" +
-             Meteor.user().services.facebook.accessToken,
-        crossDomain: true,
-        dataType: "json",
-        error: function(req) {
-          console.log("CRAP", req);
-        },
-        success: function(data) {
-          Session.set("friends", data.data);
-        }
-      });
+      Meteor.call('refreshFriends');
     },
     'click .remove-badgetype': function(evt) {
       BadgeTypes.remove(this._id);
@@ -184,6 +173,28 @@ if (Meteor.isServer) (function setupServer() {
     remove: isAdminUser,
     update: isAdminUser
   });
+  Meteor.methods({
+    refreshFriends: function() {
+      if (this.userId) {
+        var userId = this.userId;
+        var token = Meteor.users.findOne({
+          _id: this.userId
+        }).services.facebook.accessToken;
+        Meteor.http.call("GET", "https://graph.facebook.com/me/friends", {
+          params: {
+            access_token: token
+          },
+          timeout: 3000,
+        }, function(err, result) {
+          if (!err) {
+            Meteor.users.update({_id: userId}, {
+              $set: {friends: result.data.data}
+            });
+          }
+        });
+      }
+    }
+  });
   Meteor.publish("rockabadge.badgeTypes", function() {
     return BadgeTypes.find();
   });
@@ -193,6 +204,7 @@ if (Meteor.isServer) (function setupServer() {
         _id: this.userId
       }, {
         fields: {
+          'friends': 1,
           'services.facebook.id': 1,
           'services.facebook.accessToken': 1
         }
